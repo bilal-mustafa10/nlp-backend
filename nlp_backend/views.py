@@ -45,16 +45,23 @@ def sentiment_year_graph(request):
         snack_df = df[df['sentence'].str.contains(snack)][['doc_date', 'doc_sentiment']]
         # convert doc_date to datetime
         snack_df['doc_date'] = pd.to_datetime(snack_df['doc_date'])
-        # Smooth the sentiment data
-        snack_df['doc_sentiment'] = snack_df['doc_sentiment'].fillna('')
+        snack_df.sort_values(by='doc_date', inplace=True)
+        snack_df_by_month = snack_df.groupby(pd.PeriodIndex(snack_df['doc_date'], freq="M"))[
+            'doc_sentiment'].mean().reset_index()
 
-        return_data = {
-            "x": snack_df['doc_date'].dt.year.tolist(),
-            "y": snack_df['doc_sentiment'].tolist()
-        }
-        # convert to a tuple of (year, sentiment)
-        return_data = list(zip(return_data['x'], return_data['y']))
-        return HttpResponse(json.dumps(return_data), content_type='application/json')
+        snack_df_by_month['doc_date'] = snack_df_by_month['doc_date'].astype(str)
+        snack_df_by_month['doc_date'] = pd.to_datetime(snack_df_by_month['doc_date'])
+        snack_df_by_month['doc_date'] = snack_df_by_month['doc_date'].dt.strftime('%Y-%m')
+        snack_df_by_month['doc_sentiment'] = snack_df_by_month['doc_sentiment']
+
+
+        #snack_df['doc_date'] = snack_df_by_month['doc_date'].dt.year
+        # Smooth the sentiment data
+        snack_df['doc_sentiment'] = snack_df_by_month['doc_sentiment']
+        snack_df['doc_sentiment'] = snack_df_by_month['doc_sentiment'].fillna('')
+
+        # return list of dictionaries with date and sentiment as x and y
+        return HttpResponse(json.dumps(snack_df_by_month.to_dict('records')), content_type='application/json')
 
 
 # Find highest talked of country
