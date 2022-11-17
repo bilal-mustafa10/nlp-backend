@@ -1,4 +1,6 @@
 import json
+
+import pandas as pd
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from transformers import pipeline
@@ -45,21 +47,23 @@ def q_a_facebook(request):
         return HttpResponse(json.dumps(result), content_type='application/json')
 
 
+@csrf_exempt
 def sentiment_year_graph(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         snack = data["snack"]
         snack_df = df[df['sentence'].str.contains(snack)][['doc_date', 'doc_sentiment']]
         # convert doc_date to datetime
-        snack_df['doc_date'] = pd.to_datetime(snack_df['doc_date'], format='%Y-%m-%dT%H:%M:%SZ')
+        snack_df['doc_date'] = pd.to_datetime(snack_df['doc_date'])
         # Smooth the sentiment data
-        snack_df['doc_sentiment'] = snack_df['doc_sentiment']
+        snack_df['doc_sentiment'] = snack_df['doc_sentiment'].fillna('')
 
         return_data = {
-            "x" : snack_df['doc_date'].dt.year.tolist(),
-            "y" : snack_df['doc_sentiment'].tolist()
+            "x": snack_df['doc_date'].dt.year.tolist(),
+            "y": snack_df['doc_sentiment'].tolist()
         }
         return HttpResponse(json.dumps(return_data), content_type='application/json')
+
 
 # Find highest talked of country
 def find_snack_highest_talked_country(snack):
