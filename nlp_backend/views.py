@@ -69,7 +69,12 @@ def snack_continent_pie_chart(request):
         data = json.loads(request.body.decode('utf-8'))
         snack = data["snack"]
         continent_dict = get_continent_dist_for_a_snack(snack)
-        return HttpResponse(json.dumps(continent_dict), content_type='application/json')
+        # convert the continent_dict to a the following format
+        # [{'label: 'North America', 'value': 100}, {'label: 'South America', 'value': 100}]
+        continent_list = []
+        for key, value in continent_dict.items():
+            continent_list.append({'label': key, 'value': value})
+        return HttpResponse(json.dumps(continent_list), content_type='application/json')
 
 
 # Find highest talked of country
