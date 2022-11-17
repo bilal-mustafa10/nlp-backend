@@ -8,16 +8,6 @@ from transformers import pipeline
 from nlp_backend import interesting, fb_ai, df
 
 
-def sethu_information(request):
-    if request.method == 'GET':
-        data = {
-            "user": "Sethu",
-            "date": "14-Feb-2001",
-            "gender": "male"
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-
-
 @csrf_exempt
 def return_highest_snack_country(request):
     if request.method == 'POST':
