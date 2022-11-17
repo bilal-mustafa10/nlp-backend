@@ -1,1 +1,6 @@
 nlp_backend/assets/cleanedDF.csv
+nlp_backend/__pycache__/__init__.cpython-310.pyc
+nlp_backend/__pycache__/settings.cpython-310.pyc
+nlp_backend/__pycache__/views.cpython-310.pyc
+nlp_backend/__pycache__/wsgi.cpython-310.pyc
+nlp_backend/__pycache__/urls.cpython-310.pyc
