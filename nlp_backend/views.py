@@ -52,6 +52,8 @@ def sentiment_year_graph(request):
             "x": snack_df['doc_date'].dt.year.tolist(),
             "y": snack_df['doc_sentiment'].tolist()
         }
+        # convert to a tuple of (year, sentiment)
+        return_data = list(zip(return_data['x'], return_data['y']))
         return HttpResponse(json.dumps(return_data), content_type='application/json')
 
 
