@@ -54,8 +54,7 @@ def sentiment_year_graph(request):
         snack_df_by_month['doc_date'] = snack_df_by_month['doc_date'].dt.strftime('%Y-%m')
         snack_df_by_month['doc_sentiment'] = snack_df_by_month['doc_sentiment']
 
-
-        #snack_df['doc_date'] = snack_df_by_month['doc_date'].dt.year
+        # snack_df['doc_date'] = snack_df_by_month['doc_date'].dt.year
         # Smooth the sentiment data
         snack_df['doc_sentiment'] = snack_df_by_month['doc_sentiment']
         snack_df['doc_sentiment'] = snack_df_by_month['doc_sentiment'].fillna('')
@@ -71,7 +70,7 @@ def snack_continent_pie_chart(request):
         snack = data["snack"]
         continent_dict = get_continent_dist_for_a_snack(snack)
         return HttpResponse(json.dumps(continent_dict), content_type='application/json')
-        
+
 
 # Find highest talked of country
 def find_snack_highest_talked_country(snack):
@@ -85,33 +84,38 @@ def find_snack_highest_talked_country(snack):
 
 def get_continent_dist_for_a_snack(snack):
     valuecounting = df.doc_publish_location.value_counts().to_dict()
-    countries=[]
-    for key,value in valuecounting.items():
-    if ',' in key:
-        country = key.split(",",1)[1]
-        countries.append(country)
-        df["doc_publish_location"]=df["doc_publish_location"].replace([key], country, regex=True)
-    north_america=[" United States", " Canada", "Mexico"]
+    countries = []
+    for key, value in valuecounting.items():
+        if ',' in key:
+            country = key.split(",", 1)[1]
+            countries.append(country)
+            df["doc_publish_location"] = df["doc_publish_location"].replace([key], country, regex=True)
+    north_america = [" United States", " Canada", "Mexico"]
     north_america_total = 0
-    south_america=[" Brazil", ' Columbia', ' Venuzuela', ' Argentina', ' Jamaica']
+    south_america = [" Brazil", ' Columbia', ' Venuzuela', ' Argentina', ' Jamaica']
     south_america_total = 0
-    europe=[' United Kingdom', ' France', ' Ireland',' Germany', ' Spain', ' Montenegro',' European Union', ' Cyprus', ' Austria', ' Netherlands', ' Croatia', ' Russia', ' Switzerland', ' Denmark', ' Malta', ' Latvia', ' Hungary', ' Luxembourg', ' Azerbaijan',' Greece', ' Ukraine', ' Romania', ' Gibraltar', ' Italy', ' Georgia']
+    europe = [' United Kingdom', ' France', ' Ireland', ' Germany', ' Spain', ' Montenegro', ' European Union',
+              ' Cyprus', ' Austria', ' Netherlands', ' Croatia', ' Russia', ' Switzerland', ' Denmark', ' Malta',
+              ' Latvia', ' Hungary', ' Luxembourg', ' Azerbaijan', ' Greece', ' Ukraine', ' Romania', ' Gibraltar',
+              ' Italy', ' Georgia']
     europe_total = 0
-    asia_total=0
-    africa=[" South Africa", ' Nigeria', ' Kenya', ' Ghana', ' Zimbabwe', ' Trinidad and Tobago', ' Rwanda', ' Uganda', ' Tanzania']
+    asia_total = 0
+    africa = [" South Africa", ' Nigeria', ' Kenya', ' Ghana', ' Zimbabwe', ' Trinidad and Tobago', ' Rwanda',
+              ' Uganda', ' Tanzania']
     africa_total = 0
-    for i,j in valuecounting.items():
-    if i in north_america:
-        north_america_total += j
-    elif i in south_america:
-        south_america_total += j
-    elif i in europe:
-        europe_total += j
-    elif i in africa:
-        africa_total += j
-    else:
-        asia_total += j
+    for i, j in valuecounting.items():
+        if i in north_america:
+            north_america_total += j
+        elif i in south_america:
+            south_america_total += j
+        elif i in europe:
+            europe_total += j
+        elif i in africa:
+            africa_total += j
+        else:
+            asia_total += j
 
-    continent_dict = {"North America": north_america_total, "South America":south_america_total, "Asia": asia_total, "Africa": africa_total, "Europe":europe_total}
-    
+    continent_dict = {"North America": north_america_total, "South America": south_america_total, "Asia": asia_total,
+                      "Africa": africa_total, "Europe": europe_total}
+
     return continent_dict
