@@ -68,14 +68,17 @@ def snack_continent_pie_chart(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         snack = data["snack"]
-        continent_dict = get_continent_dist_for_a_snack(snack)
+        continent_perentage_list = get_continent_dist_for_a_snack(snack)
+        # continent_perentage_list = [20,30,10,40]
         # convert the continent_dict to a the following format
         # [{'label: 'North America', 'value': 100}, {'label: 'South America', 'value': 100}]
-        continent_list = []
-        for key, value in continent_dict.items():
-            continent_list.append({'label': key, 'value': value})
-        return HttpResponse(json.dumps(continent_list), content_type='application/json')
-
+        ans = {'North America': 0,'South America': 0, 'Europe': 0, 'Asia': 0, 'Africa': 0}
+        # put the continent_perentage_list into the ans dict
+        for i in range(len(continent_perentage_list)):
+            ans[list(ans.keys())[i]] = continent_perentage_list[i]
+        # convert the ans dict to the required format
+        ans = [{'name': key, 'value': value} for key, value in ans.items()]
+        return HttpResponse(json.dumps(ans), content_type='application/json')
 
 # Find highest talked of country
 def find_snack_highest_talked_country(snack):
@@ -88,13 +91,6 @@ def find_snack_highest_talked_country(snack):
 
 
 def get_continent_dist_for_a_snack(snack):
-    valuecounting = df.doc_publish_location.value_counts().to_dict()
-    countries = []
-    for key, value in valuecounting.items():
-        if ',' in key:
-            country = key.split(",", 1)[1]
-            countries.append(country)
-            df["doc_publish_location"] = df["doc_publish_location"].replace([key], country, regex=True)
     north_america = [" United States", " Canada", "Mexico"]
     north_america_total = 0
     south_america = [" Brazil", ' Columbia', ' Venuzuela', ' Argentina', ' Jamaica']
@@ -107,20 +103,19 @@ def get_continent_dist_for_a_snack(snack):
     asia_total = 0
     africa = [" South Africa", ' Nigeria', ' Kenya', ' Ghana', ' Zimbabwe', ' Trinidad and Tobago', ' Rwanda',
               ' Uganda', ' Tanzania']
+
     africa_total = 0
-    for i, j in valuecounting.items():
-        if i in north_america:
-            north_america_total += j
-        elif i in south_america:
-            south_america_total += j
-        elif i in europe:
-            europe_total += j
-        elif i in africa:
-            africa_total += j
-        else:
-            asia_total += j
-
-    continent_dict = {"North America": north_america_total, "South America": south_america_total, "Asia": asia_total,
-                      "Africa": africa_total, "Europe": europe_total}
-
-    return continent_dict
+    for i in north_america:
+        north_america_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
+    for i in south_america:
+        south_america_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
+    for i in europe:
+        europe_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
+    for i in africa:
+        africa_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
+    asia_total = len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(' Asia'))])
+    answer = north_america_total, south_america_total, europe_total, asia_total, africa_total
+    # scale the data to total to 1
+    # make sure the answers are split into percentages of the total so that they can be compared
+    percent = [i * 100 / sum(answer) for i in answer]
+    return percent
