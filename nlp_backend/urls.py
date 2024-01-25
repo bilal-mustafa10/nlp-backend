@@ -20,5 +20,9 @@ import nlp_backend.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('sethu/', nlp_backend.views.sethu_information, name='Sethu Information')
+    path('snack/', nlp_backend.views.return_highest_snack_country, name='Get highest snack country'),
+    path('question/', nlp_backend.views.q_a_facebook, name='Get Question and Answer'),
+    path('snack/sentiment/', nlp_backend.views.sentiment_year_graph, name='Get Sentiment of a snack'),
+    path('snack/piechart/', nlp_backend.views.snack_continent_pie_chart, name='Get Pie Chart')
 ]
+
