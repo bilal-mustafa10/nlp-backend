@@ -2,6 +2,9 @@ import json
 
 import pandas as pd
 from django.http import HttpResponse
+from nlp_backend import interesting, fb_ai
+
+
 from django.views.decorators.csrf import csrf_exempt
 from transformers import pipeline
 
@@ -104,18 +107,36 @@ def get_continent_dist_for_a_snack(snack):
     africa = [" South Africa", ' Nigeria', ' Kenya', ' Ghana', ' Zimbabwe', ' Trinidad and Tobago', ' Rwanda',
               ' Uganda', ' Tanzania']
 
-    africa_total = 0
-    for i in north_america:
-        north_america_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
-    for i in south_america:
-        south_america_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
-    for i in europe:
-        europe_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
-    for i in africa:
-        africa_total += len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(i))])
-    asia_total = len(df[(df['sentence'].str.contains(snack)) & (df['sentence'].str.contains(' Asia'))])
-    answer = north_america_total, south_america_total, europe_total, asia_total, africa_total
-    # scale the data to total to 1
-    # make sure the answers are split into percentages of the total so that they can be compared
-    percent = [i * 100 / sum(answer) for i in answer]
+
+
+def return_highest_snack_country(request,snack):
+    if request.method == 'GET':
+        country = find_snack_highest_talked_country(snack)
+        return HttpResponse(json.dumps(country), content_type='application/json')
+
+
+# topic - "Walnuts" 
+# question - "What are some famous walnut types?"
+# answer - "Organic Walnuts and Organic Walnuts with Apple Cinnamon"
+def q_a_facebook(request, topic, question):
+    model_name = "deepset/roberta-base-squad2"
+    fb_ai = pipeline('question-answering', model=model_name, tokenizer=model_name)
+    sentences_topic = ' '.join(interesting[interesting['sentence'].str.contains(topic)]['sentence'])
+
+
+
+
+
+
+
+# Find highest talked of country
+def find_snack_highest_talked_country(snack):
+  countries = {}
+  for country in df['doc_publish_location'].unique():
+      countries[country] = df[df['doc_publish_location'] == country]['sentence'].str.contains(snack).sum()
+
+  # Find the country that has the highest count
+  return max(countries, key=countries.get)
+ * 100 / sum(answer) for i in answer]
     return percent
+
